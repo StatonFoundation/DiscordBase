@@ -1,0 +1,19 @@
+[
+  {
+    "name":"hi",
+    "actions":[
+      {
+        "name":"template"
+      }
+    ],
+    "restriction":0,
+    "permission":"NONE",
+    "id":"12312",
+    "debug":true,
+    "lifecycle":{
+      "remove":false,
+      "loading":true,
+      "completed":true
+    }
+  }
+]

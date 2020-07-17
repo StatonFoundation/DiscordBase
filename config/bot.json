@@ -1,0 +1,15 @@
+{
+  "tag": ".",
+  "separator": "\\s",
+  "token": "NjU1MTY3MTg3NjEwNTAxMTIw.Xkt4xw.ZYWeZlJpfZ_y2bpeqTOm0k9C620",
+  "errorMsg": {
+    "content": "***Operation Failed -*** <:xmark:624728648154349578>",
+    "embed": {
+      "title": "There Was An Error",
+      "color": 16713736
+    }
+  },
+  "loadingMsg": "***Loading*** <a:Loading:590313581963247617>",
+  "completedMsg": "***Operation Complete -*** <:checkmark:624728612154638336>",
+  "failedMsg":"***Operation Failed -*** <:xmark:624728648154349578>"
+}
