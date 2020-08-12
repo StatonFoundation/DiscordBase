@@ -1,19 +1,20 @@
 [
   {
-    "name":"hi",
+    "name":"clearchat",
+    "aliases":["cc"],
     "actions":[
       {
-        "name":"template"
+        "name":"wipechannel"
       }
     ],
     "restriction":0,
     "permission":"NONE",
     "id":"12312",
-    "debug":true,
+    "debug":false,
     "lifecycle":{
-      "remove":false,
-      "loading":true,
-      "completed":true
+      "remove":true,
+      "loading":false,
+      "completed":false
     }
   }
 ]

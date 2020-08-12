@@ -1,0 +1,18 @@
+{
+  "events":{
+    "channelCreate":{
+      "actions":[
+        {
+          "name":"wipeChannel"
+        }
+      ]
+    },
+    "message":{
+      "actions":[
+        {
+          "name":"template"
+        }
+      ]
+    }
+  }
+}

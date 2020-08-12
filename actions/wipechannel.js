@@ -2,7 +2,7 @@ module.exports=Object.freeze({
   /**
    * Action Name Used In Commands.json
    */
-  name:'template',
+  name:'wipechannel',
   /**
    * Action Field Key Names Within Commands.json
    */
@@ -11,6 +11,6 @@ module.exports=Object.freeze({
    * Ran Async Function Upon Action Call
    */
   action:async function(cache){
-    return console.log(cache.event.args)
+    return await cache.msg.channel.bulkDelete(100);
   }
 })
