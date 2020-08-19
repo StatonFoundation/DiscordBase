@@ -1,0 +1,70 @@
+{
+  "ranks": {
+    "colors": [
+      62844,
+      45804,
+      15107072,
+      15027726,
+      16713736
+    ],
+    "ids": [
+      "564305478859882546",
+      "564305753012436994",
+      "564306010018414593",
+      "564306456241897478",
+      "564306687029280774"
+    ],
+    "emojis": {
+      "ids": [
+        "619935639961337887",
+        "619935721792208937",
+        "619935762758238208",
+        "620430361519980554",
+        "619935870543462400"
+      ],
+      "names": [
+        "rank1",
+        "rank2",
+        "rank3",
+        "rank4",
+        "rank5"
+      ]
+    },
+    "names": [
+      "I®",
+      "II®",
+      "III®",
+      "IV®",
+      "V®"
+    ],
+    "iconUrls": [
+      "https://cdn.discordapp.com/attachments/600897070555070494/619936053780021248/Irank.png",
+      "https://cdn.discordapp.com/attachments/600897070555070494/619936121580814366/IIrank.png",
+      "https://cdn.discordapp.com/attachments/600897070555070494/619936154631798803/IIIrank.png",
+      "https://cdn.discordapp.com/attachments/600897070555070494/620429325996523534/IVrank.png",
+      "https://cdn.discordapp.com/attachments/600897070555070494/619936222185259011/Vrank-1.png"
+    ],
+    "rarities": [
+      "Common",
+      "Uncommon",
+      "Very Uncommon",
+      "Super",
+      "RARE®"
+    ]
+  },
+  "guild": {
+    "id": "397248225570193410",
+    "realms": [
+      "Slave",
+      "Peasant",
+      "Civilian",
+      "Wealthy",
+      "RARE®"
+    ]
+  },
+  "colors":{
+    "default":15844367,
+    "white":16777214,
+    "error":16713736
+  }
+}

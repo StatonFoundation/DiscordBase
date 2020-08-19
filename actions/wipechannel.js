@@ -2,7 +2,7 @@ module.exports=Object.freeze({
   /**
    * Action Name Used In Commands.json
    */
-  name:'wipechannel',
+  name:''||require('path').basename(__filename).replace('.js', ''),
   /**
    * Action Field Key Names Within Commands.json
    */

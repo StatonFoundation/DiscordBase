@@ -55,6 +55,7 @@ Bot.init=async function() {
   this.formatCommands();
   await Actions.init();
   await Events.init();
+  await this.login();
 };
 Bot.initClient=function() {
   return this.client=new djs.Client();
@@ -65,42 +66,59 @@ Bot.initEvent=function() {
 };
 Bot.setup=async function() {
   await Config.init();
-  await this.login();
   this.initEvent();
 };
 Bot.checkTag=(content) => {
   const {tag,separator}=Config.bot;
-  content=content.split(new RegExp(separator))[0];
-  if(!content.startsWith(tag)) {return;}
-  return content.substring(tag.length);
+  content=content.split(new RegExp(separator));
+  if(!content[0].startsWith(tag)) {return;}
+  return [content[0].substring(tag.length),...content.slice(1)];
 };
 Bot.formatCommands=function() {
-  for(cmd of Config.commands) {
-    this.cmds[cmd.name]=cmd;
+  const parseCommand=(cmd) => {
+    cmd.name=cmd.name.toUpperCase();
+    this.cmds[cmd.name]={...cmd,original: true};
     if(cmd.aliases) {
       for(alias of cmd.aliases) {
-        this.cmds[alias]=cmd;
+        this.cmds[alias.toUpperCase()]={...cmd,aliases: false};
       }
     }
+    if(cmd.extras) {
+      for(extra of cmd.extras) {
+        parseCommand({
+          ...extra,
+          name: `${cmd.name}_${extra.name}`,
+          ...extra.aliases&&{aliases: extra.aliases.map(alias => `${cmd.name}_${alias}`)}
+        });
+      }
+    }
+  };
+  for(cmd of Config.commands) {
+    parseCommand(cmd);
   }
 };
 Bot.checkCommand=function(msg) {
-  let command=this.checkTag(msg.content);
+  let command=this.checkTag(msg.content); // Returns Split Discord Message By Tag
   if(!command) {return;}
-  const cmd=this.cmds[command];
-  if(cmd) {
-    Actions.preform(msg,cmd);
-    return cmd;
-  }
+  cmdName=command.reduce((prev,cur,i) => {
+    let prevCmd=this.cmds[prev.toUpperCase()];
+    let combinedCmdName=`${prevCmd.name}_${cur}`.toUpperCase();
+    let curCmd=prevCmd&&this.cmds[combinedCmdName]
+    if(curCmd){return combinedCmdName}
+    return prevCmd.name.toUpperCase();
+  });
+  const cmd=this.cmds[cmdName];
+  if(!cmd) {return;}
+  Actions.preform(msg,cmd);
+  return cmd;
 };
 Bot.onReady=() => {
   console.log();
 };
 Bot.onMessage=function(msg) {
   if(msg.author.bot) {return;}
-  let cmd;
   try {
-    cmd=this.checkCommand(msg);
+    this.checkCommand(msg);
   }
   catch(e) {
     console.log(e);
@@ -116,13 +134,13 @@ Actions.getDiscordBase=() => {return DiscordBase;};
 Actions.init=async function() {
   const {fs,path}=Files;
   const dir='actions';
-  await fs.readdirSync(path.join(__dirname,dir)).forEach(function(file) {
+  await fs.readdirSync(path.join(__dirname,dir)).forEach((file)=>{
     if(path.extname(file)=='.js') {
       const action=require(require('path').join(__dirname,dir,file));
       if(!action.action) {return;}
-      this[action.name.toLowerCase()]=action.action;
+      this[action.name.toLowerCase()]=action.action.bind(this);
     }
-  }.bind(this));
+  });
 };
 Actions.eval=function(content,cache) {
   if(!content) {return;}
@@ -176,7 +194,7 @@ Actions.preform=function(msg,cmd) {
 };
 Actions.invoke=async function(msg,cmd) {
   const {actions}=cmd;
-  if(!actions[0]) {return console.log(new Error(`Command ${cmd.name} Has No Actions To Run`));}
+  if(!actions||!actions[0]) {return console.log(new Error(`Command ${cmd.name} Has No Actions To Run`));}
   const cache={
     cmd,
     index: 0,
@@ -191,7 +209,7 @@ Actions.invoke=async function(msg,cmd) {
       callback.bind(this)();
     }
   };
-  if(cmd.lifecycle.remove) {await msg.delete();}
+  if(cmd.lifecycle&&cmd.lifecycle.remove) {await msg.delete();}
   await this.displayLoading(cache);
   for(let i=0;i<actions.length;i++) {
     const action=actions[i];
@@ -234,17 +252,16 @@ Actions.displayFailed=async (cache) => {
 let Events=DiscordBase.Events={};
 Events.init=function() {
   const {events}=Config.events;
-  const eventKeys=Object.keys(events);
-  for(let i=0;i<eventKeys.length;i++) {
-    const event=events[eventKeys[i]];
-    Bot.client.on(eventKeys[i],async function({...res}){
-      await this.invoke({...event,args:res});
+  for(eventKey in events){
+    let event=events[eventKey];
+    Bot.client.on(eventKey,async function({...res}) {
+      await this.invoke({...event,args: {...res}});
     }.bind(this));
   }
 };
-Events.invoke=async function(event){
+Events.invoke=async function(event) {
   const {actions}=event;
-  if(!actions[0]){return console.log(new Error(`Event ${event.name} Has No Actions To Run`))};
+  if(!actions&&!actions[0]) {return console.log(new Error(`Event ${event.name} Has No Actions To Run`));};
   const cache={
     event,
     index: 0,
@@ -267,6 +284,6 @@ Events.invoke=async function(event){
       break;
     }
   }
-}
+};
 
 Bot.init();

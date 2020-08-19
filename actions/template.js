@@ -2,7 +2,7 @@ module.exports=Object.freeze({
   /**
    * Action Name Used In Commands.json
    */
-  name:'template',
+  name:''||require('path').basename(__filename).replace('.js', ''),
   /**
    * Action Field Key Names Within Commands.json
    */
@@ -11,6 +11,6 @@ module.exports=Object.freeze({
    * Ran Async Function Upon Action Call
    */
   action:async function(cache){
-    return console.log(cache.event.args)
+    console.log('Template Action Ran')
   }
 })
