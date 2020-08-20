@@ -41,7 +41,7 @@ Config.init=async function() {
 };
 Config.format=async function() {
   const {formatDirJSON,path}=Files;
-  Config={...this,...(await formatDirJSON(path.join(__dirname,'Config')))};
+  Config={...this,...(await formatDirJSON(path.join(__dirname,'config')))};
 };
 
 const Bot=DiscordBase.Bot={};
