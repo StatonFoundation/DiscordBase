@@ -103,11 +103,11 @@ Bot.checkCommand=function(msg) {
   cmdName=command.reduce((prev,cur,i) => {
     let prevCmd=this.cmds[prev.toUpperCase()];
     let combinedCmdName=`${prevCmd.name}_${cur}`.toUpperCase();
-    let curCmd=prevCmd&&this.cmds[combinedCmdName]
-    if(curCmd){return combinedCmdName}
+    let curCmd=prevCmd&&this.cmds[combinedCmdName];
+    if(curCmd) {return combinedCmdName;}
     return prevCmd.name.toUpperCase();
   });
-  const cmd=this.cmds[cmdName];
+  const cmd=this.cmds[cmdName.toUpperCase()];
   if(!cmd) {return;}
   Actions.preform(msg,cmd);
   return cmd;
@@ -134,7 +134,7 @@ Actions.getDiscordBase=() => {return DiscordBase;};
 Actions.init=async function() {
   const {fs,path}=Files;
   const dir='actions';
-  await fs.readdirSync(path.join(__dirname,dir)).forEach((file)=>{
+  await fs.readdirSync(path.join(__dirname,dir)).forEach((file) => {
     if(path.extname(file)=='.js') {
       const action=require(require('path').join(__dirname,dir,file));
       if(!action.action) {return;}
@@ -145,7 +145,7 @@ Actions.init=async function() {
 Actions.eval=function(content,cache) {
   if(!content) {return;}
   if(!cache) {return;}
-  const {msg,member,guild,loadingMsg,temp}=cache;
+  const {msg,member,guild,temp}=cache;
   const DiscordBase=this.getDiscordBase();
   const globalVars=Files.data.global;
   const guildVars=Files.data.guilds[guild.id];
@@ -175,7 +175,7 @@ Actions.checkRole=(msg,role) => {
 };
 Actions.checkConditions=function(msg,cmd) {
   const isGuild=Boolean(msg.guild&&msg.member);
-  const restriction=parseInt(cmd.restriction);
+  const restriction=parseInt(cmd.restriction)||0;
   const {role,permission}=cmd;
   const isPassing=() => {
     switch(restriction) {
@@ -188,6 +188,9 @@ Actions.checkConditions=function(msg,cmd) {
   };
   return Boolean(this.checkRole(msg,role)&&this.checkPermission(msg,permission)&&isPassing());
 };
+Actions.setTempVar=function(key,value,cache){
+  cache[key]=value;
+}
 Actions.preform=function(msg,cmd) {
   if(!this.checkConditions(msg,cmd)) {return;}
   this.invoke(msg,cmd);
@@ -202,6 +205,7 @@ Actions.invoke=async function(msg,cmd) {
     guild: msg.guild,
     msg,
     client: Bot.client,
+    Config,
     resMsg: null,
     closeAction: function(callback=() => {}) {
       actions.slice(0,actions.length);
@@ -209,25 +213,29 @@ Actions.invoke=async function(msg,cmd) {
       callback.bind(this)();
     }
   };
-  if(cmd.lifecycle&&cmd.lifecycle.remove) {await msg.delete();}
-  await this.displayLoading(cache);
+  cmd.lifecycle=cmd.lifecycle||{
+    remove: false,
+    loading: true,
+    completed: true
+  };
+  if(cmd.lifecycle.remove) {await msg.delete();}
+  if(cmd.lifecycle.loading) {await this.displayLoading(cache);}
   for(let i=0;i<actions.length;i++) {
     const action=actions[i];
     try {
-      await this[action.name](cache);
+      await this[action.name.toLowerCase()](cache);
       cache.index+=1;
     }
     catch(e) {
-      if(cmd.debug) {this.displayError(cache,e);}
+      if(true) {this.displayError(cache,e);}
       console.log(e);
       break;
     }
   }
-  await this.displayCompleted(cache);
+  if(cmd.lifecycle.completed) {await this.displayCompleted(cache);}
 };
 Actions.displayError=async (cache,e) => {
-  if(!cache.cmd.debug) {return;}
-  const errorEmbed={...Config.bot.errorMsg.embed,description: e.message};
+  const errorEmbed={...Config.bot.errorMsg.embed,description: e.message,...e.embed&&e.embed};
   let errorMsg={...Config.bot.errorMsg,embed: errorEmbed};
   if(!cache.resMsg) {return await cache.msg.send(errorMsg);}
   cache.completed=true;
@@ -252,7 +260,7 @@ Actions.displayFailed=async (cache) => {
 let Events=DiscordBase.Events={};
 Events.init=function() {
   const {events}=Config.events;
-  for(eventKey in events){
+  for(eventKey in events) {
     let event=events[eventKey];
     Bot.client.on(eventKey,async function({...res}) {
       await this.invoke({...event,args: {...res}});
@@ -266,6 +274,7 @@ Events.invoke=async function(event) {
     event,
     index: 0,
     temp: {},
+    Config,
     client: Bot.client,
     closeAction: function(callback=() => {}) {
       actions.slice(0,actions.length);
