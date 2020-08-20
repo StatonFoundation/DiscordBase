@@ -125,7 +125,7 @@ Bot.onMessage=function(msg) {
   }
 };
 Bot.login=async function() {
-  await this.client.login(process.env.LOGIN_TOKEN||Config.bot.token);
+  await this.client.login(process.env.BOT_TOKEN||Config.bot.token);
   console.log(console.chalk.blue.bold.underline("Bot Ready"));
 };
 
